@@ -6,31 +6,31 @@ import commands
 def applyswitch():
     newmode = v.get()
     if newmode == 'wifi' or newmode == '4g':
-        commands.getoutput('./t.sh ' + newmode)
-        tips['text'] = reboottext
-        if askokcancel(title='Reboot', message="Do you want reboot to apply the new configuration?"):
-            commands.getoutput('sudo reboot')
-        else:
-            print 'you cancel the reboot'
+        ret = commands.getstatusoutput('./t.sh ' + newmode)
+        updatetips(ret[1])
+        if ret[0] == 0:
+            if askokcancel(title='Reboot', message="Do you want reboot to apply the new configuration?"):
+                commands.getoutput('sudo reboot')
+            else:
+                print 'you cancel the reboot'
     else:
-        tips['text'] = errortext
+        updatetips(errortext)
 
-
-def updatetips():
-    tips['text'] = infotext
-
-
-currentmode = commands.getoutput("./t.sh mode")
-print currentmode
-top = Tk()
-top.title("mode setting")
-Label(top, bg='green',text="Current mode is :"+currentmode).pack(fill=X)
-Label(top, text="switch mode to :").pack(anchor=W)
-# Tkinter.sp
 
 infotext = "select the new mode and click apply to switch mode."
 reboottext = "Mode switch finished. \nYou need reboot system to apply the new mode."
 errorext = "Invalid selected mode"
+def updatetips(msg):
+    tips['text'] = msg 
+
+
+currentmode = commands.getoutput("./t.sh mode")
+print currentmode
+
+top = Tk()
+top.title("mode setting")
+Label(top, bg='green',text="Current mode is :"+currentmode).pack(fill=X)
+Label(top, text="switch mode to :").pack(anchor=W)
 
 v = StringVar()
 v.set(currentmode)
@@ -41,8 +41,5 @@ Button(top, text="Apply new mode", command =applyswitch).pack(fill=X)
 
 tips = Label(top, text=infotext)
 tips.pack()
-
-
-
 
 mainloop()
